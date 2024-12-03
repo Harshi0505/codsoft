@@ -1,0 +1,96 @@
+toimport java.util.*;
+
+class Question {
+    private String questionText;
+    private String[] options;
+    private int correctAnswer;
+
+    public Question(String questionText, String[] options, int correctAnswer) {
+        this.questionText = questionText;
+        this.options = options;
+        this.correctAnswer = correctAnswer;
+    }
+
+    public String getQuestionText() {
+        return questionText;
+    }
+
+    public String[] getOptions() {
+        return options;
+    }
+
+    public int getCorrectAnswer() {
+        return correctAnswer;
+    }
+}
+
+class Quiz {
+    private List<Question> questions;
+    private int score;
+    private List<Boolean> results;
+
+    public Quiz(List<Question> questions) {
+        this.questions = questions;
+        this.score = 0;
+        this.results = new ArrayList<>();
+    }
+
+    public void startQuiz() {
+        Scanner scanner = new Scanner(System.in);
+        int timeLimit = 10;
+
+        for (int i = 0; i < questions.size(); i++) {
+            Question question = questions.get(i);
+            System.out.println("\nQuestion " + (i + 1) + ": " + question.getQuestionText());
+            String[] options = question.getOptions();
+            for (int j = 0; j < options.length; j++) {
+                System.out.println((j + 1) + ". " + options[j]);
+            }
+
+            Timer timer = new Timer();
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    System.out.println("\nTime's up! Moving to the next question.");
+                    results.add(false);
+                }
+            };
+
+            timer.schedule(task, timeLimit * 1000);
+            int userAnswer = scanner.nextInt();
+            timer.cancel();
+
+            if (userAnswer == question.getCorrectAnswer()) {
+                score++;
+                results.add(true);
+                System.out.println("Correct!");
+            } else {
+                results.add(false);
+                System.out.println("Incorrect.");
+            }
+        }
+        displayResults();
+        scanner.close();
+    }
+
+    public void displayResults() {
+        System.out.println("\n--- Quiz Results ---");
+        System.out.println("Final Score: " + score + "/" + questions.size());
+        for (int i = 0; i < results.size(); i++) {
+            String result = results.get(i) ? "Correct" : "Incorrect";
+            System.out.println("Question " + (i + 1) + ": " + result);
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List<Question> questions = new ArrayList<>();
+        questions.add(new Question("What is the capital of France?", new String[]{"Berlin", "London", "Paris", "Madrid"}, 3));
+        questions.add(new Question("Who wrote 'To Kill a Mockingbird'?", new String[]{"Harper Lee", "Mark Twain", "George Orwell", "Jane Austen"}, 1));
+        questions.add(new Question("What is 2 + 2?", new String[]{"3", "4", "5", "6"}, 2));
+
+        Quiz quiz = new Quiz(questions);
+        quiz.startQuiz();
+    }
+}
