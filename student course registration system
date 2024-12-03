@@ -1,0 +1,190 @@
+import java.util.*;
+
+class Course {
+    private String courseCode;
+    private String title;
+    private String description;
+    private int capacity;
+    private int enrolled;
+    private String schedule;
+
+    public Course(String courseCode, String title, String description, int capacity, String schedule) {
+        this.courseCode = courseCode;
+        this.title = title;
+        this.description = description;
+        this.capacity = capacity;
+        this.enrolled = 0;
+        this.schedule = schedule;
+    }
+
+    public String getCourseCode() {
+        return courseCode;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public int getEnrolled() {
+        return enrolled;
+    }
+
+    public String getSchedule() {
+        return schedule;
+    }
+
+    public boolean registerStudent() {
+        if (enrolled < capacity) {
+            enrolled++;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean dropStudent() {
+        if (enrolled > 0) {
+            enrolled--;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean hasAvailableSlots() {
+        return enrolled < capacity;
+    }
+}
+
+class Student {
+    private String studentID;
+    private String name;
+    private List<Course> registeredCourses;
+
+    public Student(String studentID, String name) {
+        this.studentID = studentID;
+        this.name = name;
+        this.registeredCourses = new ArrayList<>();
+    }
+
+    public String getStudentID() {
+        return studentID;
+    }
+
+    public List<Course> getRegisteredCourses() {
+        return registeredCourses;
+    }
+
+    public boolean registerForCourse(Course course) {
+        if (!registeredCourses.contains(course) && course.registerStudent()) {
+            registeredCourses.add(course);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean dropCourse(Course course) {
+        if (registeredCourses.contains(course) && course.dropStudent()) {
+            registeredCourses.remove(course);
+            return true;
+        }
+        return false;
+    }
+}
+
+class CourseManagementSystem {
+    private List<Course> courseDatabase;
+    private List<Student> studentDatabase;
+
+    public CourseManagementSystem() {
+        this.courseDatabase = new ArrayList<>();
+        this.studentDatabase = new ArrayList<>();
+    }
+
+    public void addCourse(Course course) {
+        courseDatabase.add(course);
+    }
+
+    public void addStudent(Student student) {
+        studentDatabase.add(student);
+    }
+
+    public void displayCourses() {
+        System.out.println("\n--- Available Courses ---");
+        for (Course course : courseDatabase) {
+            System.out.println("Course Code: " + course.getCourseCode());
+            System.out.println("Title: " + course.getTitle());
+            System.out.println("Description: " + course.getDescription());
+            System.out.println("Capacity: " + course.getCapacity());
+            System.out.println("Enrolled: " + course.getEnrolled());
+            System.out.println("Schedule: " + course.getSchedule());
+            System.out.println("Available Slots: " + (course.getCapacity() - course.getEnrolled()));
+            System.out.println("-------------------------");
+        }
+    }
+
+    public Student findStudent(String studentID) {
+        for (Student student : studentDatabase) {
+            if (student.getStudentID().equals(studentID)) return student;
+        }
+        return null;
+    }
+
+    public Course findCourse(String courseCode) {
+        for (Course course : courseDatabase) {
+            if (course.getCourseCode().equals(courseCode)) return course;
+        }
+        return null;
+    }
+
+    public void registerStudentForCourse(String studentID, String courseCode) {
+        Student student = findStudent(studentID);
+        Course course = findCourse(courseCode);
+        if (student != null && course != null && student.registerForCourse(course)) {
+            System.out.println("Registration successful.");
+        } else {
+            System.out.println("Registration failed. Course may be full or already registered.");
+        }
+    }
+
+    public void dropStudentFromCourse(String studentID, String courseCode) {
+        Student student = findStudent(studentID);
+        Course course = findCourse(courseCode);
+        if (student != null && course != null && student.dropCourse(course)) {
+            System.out.println("Course dropped successfully.");
+        } else {
+            System.out.println("Drop failed. Course may not be registered.");
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        CourseManagementSystem cms = new CourseManagementSystem();
+        
+        Course course1 = new Course("CS101", "Intro to Programming", "Learn programming basics", 30, "MWF 9-10AM");
+        Course course2 = new Course("CS102", "Data Structures", "Learn about data structures", 25, "TTh 11-12AM");
+
+        cms.addCourse(course1);
+        cms.addCourse(course2);
+
+        Student student1 = new Student("S1001", "Alice");
+        cms.addStudent(student1);
+
+        cms.displayCourses();
+        cms.registerStudentForCourse("S1001", "CS101");
+        cms.registerStudentForCourse("S1001", "CS102");
+        cms.dropStudentFromCourse("S1001", "CS101");
+
+        System.out.println("\n--- " + student1.getStudentID() + " Registered Courses ---");
+        for (Course course : student1.getRegisteredCourses()) {
+            System.out.println("Course Code: " + course.getCourseCode() + " | Title: " + course.getTitle());
+        }
+    }
+}
